@@ -7,22 +7,30 @@ var map = new mapboxgl.Map({
 });
 
 var bbox = [126.8,37.4,127,37.6];
-var cellSide = 20;
+var cellSide = 0.5;
 var options = {};
 var hexgrid = turf.hexGrid(bbox, cellSide, options);
 
 map.on('load', function() {
 
+
+
   map.addSource("seoulpoints",{
-    "type": "geojson",
-    "data": "https://github.com/tkahng/mapboxtest1/blob/master/seoulhousingprice%20-%20Copy.geojson"
-  })
+    type: "geojson",
+    data: "./seoulhousingprice - Copy.geojson",
+    cluster: true,
+    clusterMaxZoom: 14,
+    clusterRadius: 50
+
+  });
 
   map.addLayer({
-    id: 'housepoints',
+    id: 'clusters',
     type: 'circle',
     source: "seoulpoints",
     layout: {},
     paint: {'fill-color': '#088', 'fill-opacity': [1]}
   });
+
+
 });
