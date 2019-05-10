@@ -28,7 +28,7 @@
   mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3JueG5wb2IifQ.vOYkEc5_mcoA2gtILL5ZmA';
   var map = new mapboxgl.Map({
     container: 'map', // container id
-    style: 'mapbox://styles/tkahng/cjtgtcfra73s71frr43tog96u', // stylesheet location
+    style: 'mapbox://styles/tkahng/cjvi9mbok047b1codknhyc2xu', // stylesheet location
     center: [126.994, 37.518], // starting position [lng, lat]
     zoom: 11 // starting zoom
   });
@@ -39,15 +39,7 @@
   var hexgrid = turf.hexGrid(bbox, cellSide, options);
 
   map.on('load', function() {
-    map.addLayer({
-      'id': 'historical-places',
-      'type': 'circle',
-      'source': {
-        type: 'vector',
-        url: 'mapbox://tkahng.3h12hsb6'
-      },
-      'source-layer': 'seoulhousingprice-defcds',
-    });
+    
 
     map.addSource('seoulhexgrid',{
       "type": "geojson",
