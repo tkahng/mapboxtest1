@@ -28,7 +28,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3Jue
 var map = new mapboxgl.Map({
   container: 'map', // container id
   style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
-  center: [-84.5, 38.05], // starting position
+  center: [126.994, 37.518], // starting position
   zoom: 11 // starting zoom
 });
 
@@ -59,8 +59,38 @@ var libraries = {
   ]
 };
 
+const bbox = [126,36,127,37];
+const cellSide = 50;
+const options = {};
+const hexGrid = turf.hexGrid(bbox, cellSide, options);
+hexGrid.features.forEach(f => {
+  f.properties = { density: Math.random() };
+});
 
 map.on('load', function() {
+
+  map.addLayer({
+      id: "maine",
+      type: "fill",
+      source: {
+        type: "geojson",
+        data: hexGrid
+      },
+      layout: {},
+      paint: {
+        "fill-color": "#088",
+        "fill-opacity": [
+          "interpolate",
+          ["linear"],
+          ["get", "density"],
+          0,
+          0.3,
+          1,
+          1
+        ]
+      }
+  });
+
   map.addLayer({
     id: 'hospitals',
     type: 'symbol',
@@ -96,54 +126,7 @@ map.on('load', function() {
   });
 });
 
-var popup = new mapboxgl.Popup();
 
-map.on('mousemove', function(e) {
-
-  var features = map.queryRenderedFeatures(e.point, { layers: ['hospitals', 'libraries'] });
-  if (!features.length) {
-    popup.remove();
-    return;
-  }
-
-  var feature = features[0];
-
-  popup.setLngLat(feature.geometry.coordinates)
-  .setHTML(feature.properties.Name)
-  .addTo(map);
-
-  map.getCanvas().style.cursor = features.length ? 'pointer' : '';
-
-});
-
-map.on('click', function(e) {
-  var libraryFeatures = map.queryRenderedFeatures(e.point, { layers: ['libraries'] });
-  if (!libraryFeatures.length) {
-    return;
-  }
-
-  var libraryFeature = libraryFeatures[0];
-
-  var nearestHospital = turf.nearest(libraryFeature, hospitals);
-
-  if (nearestHospital !== null) {
-
-    map.getSource('nearest-hospital').setData({
-      type: 'FeatureCollection',
-      features: [nearestHospital]
-    });
-
-    map.addLayer({
-      id: 'nearest-hospital',
-      type: 'circle',
-      source: 'nearest-hospital',
-      paint: {
-        'circle-radius': 12,
-        'circle-color': '#486DE0'
-      }
-    }, 'hospitals');
-  }
-});
 
 </script>
 </body>
