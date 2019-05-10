@@ -40,21 +40,26 @@
 
   map.on('load', function() {
     map.addLayer({
-      id: 'historical-places',
-      type: 'circle',
-      source: {
+      'id': 'historical-places',
+      'type': 'circle',
+      'source': {
         type: 'vector',
         url: 'mapbox://tkahng.3h12hsb6'
       },
       'source-layer': 'seoulhousingprice-defcds',
     });
 
+    map.addSource('seoulhexgrid',{
+      "type": "geojson",
+      "data": hexgrid
+    })
+
     map.addLayer({
       id: 'maine',
       type: 'fill',
       source: {
         type: 'geojson',
-        data: hexgrid
+        data: seoulhexgrid
       },
       layout: {},
       paint: {'fill-color': '#088', 'fill-opacity': [1]}

@@ -3,13 +3,13 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibXdpZGVuZXIiLCJhIjoibXBKQU85dyJ9.Q6yf1zk7wpnY
 var map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mwidener/cilkw1mzf001q9jkmn4212sdw',
-  center: [126.994, 37.518],
-  zoom: 11
+  center: [-90, 52],
+  zoom: 3
 });
 
 
 //CREATE A BOUNDING BOX AROUND POINTS (ALSO USE FOR HEX GRID)
-var enveloped = turf.envelope(seoulhousingprice); //send point geojson to turf, creates an 'envelope' (bounding box) around points
+var enveloped = turf.envelope(canadianAirports); //send point geojson to turf, creates an 'envelope' (bounding box) around points
 var result = {                                   //put the resulting envelope in a geojson format FeatureCollection
     "type": "FeatureCollection",
     "features": [enveloped]                      //don't forget brackets
@@ -23,7 +23,7 @@ var cellWidth = 200 //in the units you defined above
 var hexgrid = turf.hexGrid(bbox,cellWidth,hexgridUnits); //makes the new geojson hexgrid features
 
 //COUNT THE NUMBER OF AIRPORTS IN EACH HEX BIN
-var hexAirports = turf.count(hexgrid,seoulhousingprice,'airportCount');
+var hexAirports = turf.count(hexgrid,canadianAirports,'airportCount');
 
 //create jenks natural breaks - generates min, breaks, max ... remember for 5 categories, we only need 4 numbers
 var numberBreaks = 6
@@ -44,7 +44,7 @@ jenksbreaks.forEach(function(element,i){
 map.on('style.load', function(){
   map.addSource('airports',{
     "type": "geojson",
-    "data": seoulhousingprice
+    "data": canadianAirports
   })
   map.addLayer({
       "id": "airportsLayer",
