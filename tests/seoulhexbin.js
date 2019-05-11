@@ -11,7 +11,8 @@ const cellSide = 1;
 const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
 hexGrid.features.forEach(f => {
-  f.properties = { density: Math.random() };
+  var ptsWithin = turf.pointsWithinPolygon(seoulhousingprice, f);
+  f.properties = { density: Math.random(), count: ptsWithin.features.length};
 });
 
 
@@ -20,19 +21,22 @@ map.on('load', function() {
     // 'cluster' option to true. GL-JS will add the point_count property to your source data.
     map.addLayer({
         'id': 'maine',
-        'type': 'fill',
+        'type': 'fill-extrusion',
         'source': {
             'type': 'geojson',
             'data': hexGrid
         },
+        'filter': ["has", "count"],
         'layout': {},
         'paint': {
-            'fill-color': '#088',
-            'fill-opacity': [
-              "interpolate", ["linear"], ["get", "density"],
-              0, 0.3,
-              1, 1
-            ]
+            'fill-extrusion-color': '#088',
+            // 'fill-extrusion-opacity': [
+            //   "interpolate", ["linear"], ["get", "density"],
+            //   0, 0.3,
+            //   1, 1
+            // ],
+            'fill-extrusion-opacity':1,
+            'fill-extrusion-height': ["get", "count"]
         }
     });
 
@@ -76,7 +80,8 @@ map.on('load', function() {
                 30,
                 750,
                 40
-            ]
+            ],
+            "circle-opacity": 0.7
         }
     });
 
