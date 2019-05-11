@@ -6,10 +6,10 @@ var map = new mapboxgl.Map({
   zoom: 11 // starting zoom
 });
 
-var bbox = [126.8,37.4,127,37.6];
-var cellSide = 0.5;
-var options = {};
-var hexgrid = turf.hexGrid(bbox, cellSide, options);
+const bbox = [126.8, 37.4, 127.2, 37.7];
+const cellSide = 1;
+const options = {};
+const hexGrid = turf.hexGrid(bbox, cellSide, options);
 
 map.on('load', function() {
 
