@@ -6,6 +6,7 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="seoulhousingpricewgs.geojson" type="text/javascript"></script>
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -18,38 +19,63 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3JueG5wb2IifQ.vOYkEc5_mcoA2gtILL5ZmA';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v10',
-    zoom: 12,
-    center: [-122.447303, 37.753574]
+    style: 'mapbox://styles/mapbox/dark-v10',
+    center: [126.994, 37.518],
+    zoom: 10
 });
 
 map.on('load', function () {
 
     map.addLayer({
-        'id': 'population',
+        'id': 'housepoints',
         'type': 'circle',
         'source': {
-            type: 'vector',
-              url: 'mapbox://examples.8fgz4egr'
+            type: 'geojson',
+            data: seoulhousingpricewgs
         },
-        'source-layer': 'sf2010',
+
         'paint': {
             // make circles larger as the user zooms from z12 to z22
             'circle-radius': {
                 'base': 1.75,
-                'stops': [[12, 2], [22, 180]]
+                'stops': [[12, 2], [22, 300]]
             },
             // color circles by ethnicity, using a match expression
             // https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-match
+
             'circle-color': [
-                'match',
-                ['get', 'ethnicity'],
-                'White', '#fbb03b',
-                'Black', '#223b53',
-                'Hispanic', '#e55e5e',
-                'Asian', '#3bb2d0',
-                /* other */ '#ccc'
+                "interpolate-hcl", ["linear"], ["get", "A15"],
+                0, '#3bb2d0',
+                // 20000000.0, '#fbb03b',
+                24000000.0, '#e55e5e'
+            ],
+
+            // 'circle-blur': {
+            //   "interpolate", ["linear"], ["get", "A15"],
+            //   0, 1,
+            //   12000000.0, 0.3,
+            //   24000000.0, 0
+            // }
+
+            'circle-blur': 1,
+
+            // 'circle-color': '#088',
+            'circle-opacity': [
+              "interpolate", ["linear"], ["get", "A15"],
+              0, 0,
+              // 12000000.0, 0.8,
+              24000000.0, 1
             ]
+
+            // 'circle-color': [
+            //     'match',
+            //     ['get', 'ethnicity'],
+            //     'White', '#fbb03b',
+            //     'Black', '#223b53',
+            //     'Hispanic', '#e55e5e',
+            //     'Asian', '#3bb2d0',
+            //     /* other */ '#ccc'
+            // ]
         }
     });
 });
