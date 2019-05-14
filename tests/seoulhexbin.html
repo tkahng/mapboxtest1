@@ -32,21 +32,42 @@ var map = new mapboxgl.Map({
 // const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
 // arrAvg([20, 10, 5, 10]) -> 11.25
 
+const arrMax = arr => Math.max(...arr);
+const arrMin = arr => Math.min(...arr);
+// const arrSum = arr => arr.reduce((a,b) => a + b, 0)
+
 const bbox = [126.8, 37.4, 127.2, 37.7];
 const cellSide = 1;
 const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
+var hexpricesum = [];
+var hexpricemin = arrMin(hexpricesum);
+var hexpricemax = arrMax(hexpricesum);
+
 hexGrid.features.forEach(f => {
   var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
-  f.properties = { density: Math.random(), count: ptsWithin.features.length};
+  var ptsWithinPriceArr = [];
+  ptsWithin.features.forEach(e => {
+    ptsWithinPriceArr.push(e.properties['A15'])
+  })
+  const arrSum = arr => arr.reduce((a,b) => a + b, 0);
+  var ptsWithinPriceSum = arrSum(ptsWithinPriceArr);
+  var centerpoint = turf.center(f);
+  var centercoords = turf.getCoord(centerpoint);
+  hexpricesum.push(ptsWithinPriceSum);
+
+  f.properties = { pricesum: ptsWithinPriceSum, count: ptsWithin.features.length, center: centercoords};
 });
+
+
+
 
 
 map.on('load', function() {
     // Add a new source from our GeoJSON data and set the
     // 'cluster' option to true. GL-JS will add the point_count property to your source data.
     map.addLayer({
-        'id': 'maine',
+        'id': 'hex',
         'type': 'fill-extrusion',
         'source': {
             'type': 'geojson',
@@ -62,10 +83,51 @@ map.on('load', function() {
             //   1, 1
             // ],
             'fill-extrusion-opacity':1,
-            'fill-extrusion-height': ["get", "count"]
+            // 'fill-extrusion-height': ["get", "pricesum"]
+            'fill-extrusion-height': [
+                "interpolate", ["linear"], ["get", "pricesum"],
+                hexpricemin, 1,
+                hexpricemax, 200
+
+            ]
         }
     });
 
+
+    // map.on('click', 'hex', function (e) {
+
+    //     var coordinates = e.features[0].properties.center.slice();
+    //     // var coordinates = e.features[0].geometry.coordinates.slice();
+    //     var description = e.features[0].properties.pricesum.toString();
+    //     // var housingcount = e.features[0].properties.A16;
+    //     // var housingcountstr = housingcount.toString();
+    //     // var popupcontent = description + "" + "(" + housingcountstr + ")";
+
+    //     // Ensure that if the map is zoomed out such that multiple
+    //     // copies of the feature are visible, the popup appears
+    //     // over the copy being pointed to.
+    //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    //     }
+
+    //     new mapboxgl.Popup()
+    //         .setLngLat(coordinates)
+    //         .setText(description)
+    //         .addTo(map);
+    // });
+
+    // // Change the cursor to a pointer when the mouse is over the places layer.
+    // map.on('mouseenter', 'places', function () {
+    //     map.getCanvas().style.cursor = 'pointer';
+    // });
+
+    // // Change it back to a pointer when it leaves.
+    // map.on('mouseleave', 'places', function () {
+    //     map.getCanvas().style.cursor = '';
+    // });
+
+
+// });
 
 
     // map.addSource("earthquakes", {
