@@ -41,8 +41,8 @@ const cellSide = 1;
 const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
 var hexpricesum = [];
-var hexpricemin = arrMin(hexpricesum);
-var hexpricemax = arrMax(hexpricesum);
+var hexpricemin = arrMin(hexpricesum)-10;
+var hexpricemax = arrMax(hexpricesum)+10;
 
 hexGrid.features.forEach(f => {
   var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);

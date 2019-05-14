@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Launch seoulhexbin.html",
+            "type": "chrome",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${file}"
+            "file": "${workspaceFolder}/seoulhexbin.html"
         }
     ]
 }
