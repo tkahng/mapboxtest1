@@ -55,7 +55,7 @@ hexGrid.features.forEach(f => {
   ptsWithin.features.forEach(e => {
     ptsWithinPriceArr.push(e.properties['A15'])
   })
-  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr);
+  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr)*0.0001;
   var centerpoint = turf.center(f);
   var centercoords = turf.getCoord(centerpoint);
   hexpriceAvg.push(ptsWithinPriceAvg);
@@ -77,7 +77,7 @@ map.on('load', function() {
             'type': 'geojson',
             'data': hexGrid
         },
-        'filter': ["has", "count"],
+        'filter': [">", "count", 0],
         'layout': {},
         'paint': {
             'fill-extrusion-color': '#088',
@@ -87,13 +87,13 @@ map.on('load', function() {
             //   1, 1
             // ],
             'fill-extrusion-opacity':1,
-            // 'fill-extrusion-height': ["get", "pricesum"]
-            'fill-extrusion-height': [
-                "interpolate", ["linear"], ["get", "pricesum"],
-                "hexpricemin", 0,
-                hexpricemax, 200
+            'fill-extrusion-height': ["get", "pricesum"]
+            // 'fill-extrusion-height': [
+            //     "interpolate", ["linear"], ["get", "pricesum"],
+            //     "hexpricemin", 0,
+            //     hexpricemax, 200
 
-            ]
+            // ]
         }
     });
 
