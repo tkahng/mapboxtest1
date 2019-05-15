@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>Create and style clusters</title>
+    <title>Seoul Housing Price Hexbin</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
@@ -27,7 +27,9 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v10',
     center: [126.994, 37.518],
-    zoom: 12
+    zoom: 10,
+    pitch: 50,
+    bearing: 30
 });
 // const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
 // arrAvg([20, 10, 5, 10]) -> 11.25
@@ -38,15 +40,35 @@ const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
 const arrSum = arr => arr.reduce((a,b) => a + b, 0)
 
 const bbox = [126.8, 37.4, 127.2, 37.7];
-const cellSide = 1;
+const cellSide = 0.5;
 const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
-const hexpriceAvg = [];
-const hexpriceAvgclean = hexpriceAvg.filter(function (value) {
-    return !Number.isNaN(value);
-});
-const hexpricemin = arrMin(hexpriceAvgclean);
-const hexpricemax = arrMax(hexpriceAvgclean);
+var hexpriceAvg = [];
+var hexpriceAvgclean=[];
+
+
+// const hexpriceAvgclean = hexpriceAvg.filter(function (value) {
+//     return !Number.isNaN(value);
+// });
+
+var hexpricemin = arrMin(hexpriceAvgclean);
+var hexpricemax = arrMax(hexpriceAvgclean);
+
+var invalidEntries = 0;
+
+function isNumber(obj) {
+  return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+}
+
+function filterByID(item) {
+  if (isNumber(item.id) && item.id !== 0) {
+    return true;
+  } 
+  invalidEntries++;
+  return false; 
+}
+
+hexpriceAvgclean = hexpriceAvg.filter(filterByID);
 
 
 hexGrid.features.forEach(f => {
@@ -55,7 +77,7 @@ hexGrid.features.forEach(f => {
   ptsWithin.features.forEach(e => {
     ptsWithinPriceArr.push(e.properties['A15'])
   })
-  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr)*0.0001;
+  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr)*0.0005;
   var centerpoint = turf.center(f);
   var centercoords = turf.getCoord(centerpoint);
   hexpriceAvg.push(ptsWithinPriceAvg);
@@ -86,7 +108,7 @@ map.on('load', function() {
             //   0, 0.3,
             //   1, 1
             // ],
-            'fill-extrusion-opacity':1,
+            'fill-extrusion-opacity':0.5,
             'fill-extrusion-height': ["get", "pricesum"]
             // 'fill-extrusion-height': [
             //     "interpolate", ["linear"], ["get", "pricesum"],
