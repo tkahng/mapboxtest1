@@ -34,15 +34,20 @@ var map = new mapboxgl.Map({
 
 const arrMax = arr => Math.max(...arr);
 const arrMin = arr => Math.min(...arr);
-// const arrSum = arr => arr.reduce((a,b) => a + b, 0)
+const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+const arrSum = arr => arr.reduce((a,b) => a + b, 0)
 
 const bbox = [126.8, 37.4, 127.2, 37.7];
 const cellSide = 1;
 const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
-var hexpricesum = [];
-var hexpricemin = arrMin(hexpricesum);
-var hexpricemax = arrMax(hexpricesum);
+const hexpriceAvg = [];
+const hexpriceAvgclean = hexpriceAvg.filter(function (value) {
+    return !Number.isNaN(value);
+});
+const hexpricemin = arrMin(hexpriceAvgclean);
+const hexpricemax = arrMax(hexpriceAvgclean);
+
 
 hexGrid.features.forEach(f => {
   var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
@@ -50,13 +55,12 @@ hexGrid.features.forEach(f => {
   ptsWithin.features.forEach(e => {
     ptsWithinPriceArr.push(e.properties['A15'])
   })
-  const arrSum = arr => arr.reduce((a,b) => a + b, 0);
-  var ptsWithinPriceSum = arrSum(ptsWithinPriceArr);
+  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr);
   var centerpoint = turf.center(f);
   var centercoords = turf.getCoord(centerpoint);
-  hexpricesum.push(ptsWithinPriceSum);
+  hexpriceAvg.push(ptsWithinPriceAvg);
 
-  f.properties = { pricesum: ptsWithinPriceSum, count: ptsWithin.features.length, center: centercoords};
+  f.properties = { pricesum: ptsWithinPriceAvg, count: ptsWithin.features.length};
 });
 
 
@@ -86,7 +90,7 @@ map.on('load', function() {
             // 'fill-extrusion-height': ["get", "pricesum"]
             'fill-extrusion-height': [
                 "interpolate", ["linear"], ["get", "pricesum"],
-                hexpricemin, 1,
+                "hexpricemin", 0,
                 hexpricemax, 200
 
             ]
