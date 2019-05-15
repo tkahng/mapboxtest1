@@ -17,7 +17,7 @@ map.on('load', function() {
 
   map.addSource("seoulpoints",{
     type: "geojson",
-    data: "./seoulhousingprice - Copy.geojson",
+    data: seoulhousingpricewgs,
     cluster: true,
     clusterMaxZoom: 14,
     clusterRadius: 50
