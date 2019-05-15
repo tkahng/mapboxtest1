@@ -1,11 +1,12 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3JueG5wb2IifQ.vOYkEc5_mcoA2gtILL5ZmA';
+
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v10',
     center: [126.994, 37.518],
     zoom: 12
 });
-const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+// const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
 // arrAvg([20, 10, 5, 10]) -> 11.25
 
 const bbox = [126.8, 37.4, 127.2, 37.7];
@@ -14,7 +15,7 @@ const options = {};
 const hexGrid = turf.hexGrid(bbox, cellSide, options);
 hexGrid.features.forEach(f => {
   var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
-  f.properties = { density: Math.random(), count: ptsWithin.features.length, price: arrAvg(ptsWithin.features['A15'])};
+  f.properties = { density: Math.random(), count: ptsWithin.features.length};
 });
 
 

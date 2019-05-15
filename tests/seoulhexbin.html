@@ -20,6 +20,207 @@
 
 
 
-<script src='./seoulhexbin.js'></script>
+<script type="text/javascript">
+mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3JueG5wb2IifQ.vOYkEc5_mcoA2gtILL5ZmA';
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v10',
+    center: [126.994, 37.518],
+    zoom: 12
+});
+// const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+// arrAvg([20, 10, 5, 10]) -> 11.25
+
+const arrMax = arr => Math.max(...arr);
+const arrMin = arr => Math.min(...arr);
+// const arrSum = arr => arr.reduce((a,b) => a + b, 0)
+
+const bbox = [126.8, 37.4, 127.2, 37.7];
+const cellSide = 1;
+const options = {};
+const hexGrid = turf.hexGrid(bbox, cellSide, options);
+var hexpricesum = [];
+var hexpricemin = arrMin(hexpricesum)-10;
+var hexpricemax = arrMax(hexpricesum)+10;
+
+hexGrid.features.forEach(f => {
+  var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
+  var ptsWithinPriceArr = [];
+  ptsWithin.features.forEach(e => {
+    ptsWithinPriceArr.push(e.properties['A15'])
+  })
+  const arrSum = arr => arr.reduce((a,b) => a + b, 0);
+  var ptsWithinPriceSum = arrSum(ptsWithinPriceArr);
+  var centerpoint = turf.center(f);
+  var centercoords = turf.getCoord(centerpoint);
+  hexpricesum.push(ptsWithinPriceSum);
+
+  f.properties = { pricesum: ptsWithinPriceSum, count: ptsWithin.features.length, center: centercoords};
+});
+
+
+
+
+
+map.on('load', function() {
+    // Add a new source from our GeoJSON data and set the
+    // 'cluster' option to true. GL-JS will add the point_count property to your source data.
+    map.addLayer({
+        'id': 'hex',
+        'type': 'fill-extrusion',
+        'source': {
+            'type': 'geojson',
+            'data': hexGrid
+        },
+        'filter': ["has", "count"],
+        'layout': {},
+        'paint': {
+            'fill-extrusion-color': '#088',
+            // 'fill-extrusion-opacity': [
+            //   "interpolate", ["linear"], ["get", "density"],
+            //   0, 0.3,
+            //   1, 1
+            // ],
+            'fill-extrusion-opacity':1,
+            // 'fill-extrusion-height': ["get", "pricesum"]
+            'fill-extrusion-height': [
+                "interpolate", ["linear"], ["get", "pricesum"],
+                hexpricemin, 1,
+                hexpricemax, 200
+
+            ]
+        }
+    });
+
+
+    // map.on('click', 'hex', function (e) {
+
+    //     var coordinates = e.features[0].properties.center.slice();
+    //     // var coordinates = e.features[0].geometry.coordinates.slice();
+    //     var description = e.features[0].properties.pricesum.toString();
+    //     // var housingcount = e.features[0].properties.A16;
+    //     // var housingcountstr = housingcount.toString();
+    //     // var popupcontent = description + "" + "(" + housingcountstr + ")";
+
+    //     // Ensure that if the map is zoomed out such that multiple
+    //     // copies of the feature are visible, the popup appears
+    //     // over the copy being pointed to.
+    //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    //     }
+
+    //     new mapboxgl.Popup()
+    //         .setLngLat(coordinates)
+    //         .setText(description)
+    //         .addTo(map);
+    // });
+
+    // // Change the cursor to a pointer when the mouse is over the places layer.
+    // map.on('mouseenter', 'places', function () {
+    //     map.getCanvas().style.cursor = 'pointer';
+    // });
+
+    // // Change it back to a pointer when it leaves.
+    // map.on('mouseleave', 'places', function () {
+    //     map.getCanvas().style.cursor = '';
+    // });
+
+
+// });
+
+
+    // map.addSource("earthquakes", {
+    //     type: "geojson",
+    //     // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes
+    //     // from 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
+    //     data: seoulhousingpricewgs,
+    //     cluster: true,
+    //     clusterMaxZoom: 14, // Max zoom to cluster points on
+    //     clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+    // });
+
+    // map.addLayer({
+    //     id: "clusters",
+    //     type: "circle",
+    //     source: "earthquakes",
+    //     filter: ["has", "point_count"],
+    //     paint: {
+    //         // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
+    //         // with three steps to implement three types of circles:
+    //         //   * Blue, 20px circles when point count is less than 100
+    //         //   * Yellow, 30px circles when point count is between 100 and 750
+    //         //   * Pink, 40px circles when point count is greater than or equal to 750
+    //         "circle-color": [
+    //             "step",
+    //             ["get", "point_count"],
+    //             "#51bbd6",
+    //             100,
+    //             "#f1f075",
+    //             750,
+    //             "#f28cb1"
+    //         ],
+    //         "circle-radius": [
+    //             "step",
+    //             ["get", "point_count"],
+    //             20,
+    //             100,
+    //             30,
+    //             750,
+    //             40
+    //         ],
+    //         "circle-opacity": 0.7
+    //     }
+    // });
+    //
+    // map.addLayer({
+    //     id: "cluster-count",
+    //     type: "symbol",
+    //     source: "earthquakes",
+    //     filter: ["has", "point_count"],
+    //     layout: {
+    //         "text-field": "{point_count_abbreviated}",
+    //         "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+    //         "text-size": 12
+    //     }
+    // });
+
+    // map.addLayer({
+    //     id: "unclustered-point",
+    //     type: "circle",
+    //     source: "earthquakes",
+    //     filter: ["!", ["has", "point_count"]],
+    //     paint: {
+    //         "circle-color": "#11b4da",
+    //         "circle-radius": 4,
+    //         "circle-stroke-width": 1,
+    //         "circle-stroke-color": "#fff"
+    //     }
+    // });
+    //
+    // // inspect a cluster on click
+    // map.on('click', 'clusters', function (e) {
+    //     var features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+    //     var clusterId = features[0].properties.cluster_id;
+    //     map.getSource('earthquakes').getClusterExpansionZoom(clusterId, function (err, zoom) {
+    //         if (err)
+    //             return;
+    //
+    //         map.easeTo({
+    //             center: features[0].geometry.coordinates,
+    //             zoom: zoom
+    //         });
+    //     });
+    // });
+    //
+    // map.on('mouseenter', 'clusters', function () {
+    //     map.getCanvas().style.cursor = 'pointer';
+    // });
+    // map.on('mouseleave', 'clusters', function () {
+    //     map.getCanvas().style.cursor = '';
+    // });
+});
+
+</script>
 </body>
 </html>
