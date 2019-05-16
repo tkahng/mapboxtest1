@@ -6,7 +6,7 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="seoulhousingpricewgs.geojson" type="text/javascript"></script>
+    <script src="seoulresmin.geojson" type="text/javascript"></script>
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -31,7 +31,7 @@ map.on('load', function () {
         'type': 'circle',
         'source': {
             type: 'geojson',
-            data: seoulhousingpricewgs
+            data: seoulresmin
         },
 
         'paint': {
@@ -45,9 +45,9 @@ map.on('load', function () {
 
             'circle-color': [
                 "interpolate-hcl", ["linear"], ["get", "A15"],
-                0, '#3bb2d0',
+                180000, '#3bb2d0',
                 // 20000000.0, '#fbb03b',
-                24000000.0, '#e55e5e'
+                240000, '#e55e5e'
             ],
 
             // 'circle-blur': {
@@ -60,12 +60,12 @@ map.on('load', function () {
             'circle-blur': 1,
 
             // 'circle-color': '#088',
-            'circle-opacity': [
-              "interpolate", ["linear"], ["get", "A15"],
-              0, 0,
-              // 12000000.0, 0.8,
-              24000000.0, 1
-            ]
+            // 'circle-opacity': [
+            //   "interpolate", ["linear"], ["get", "A15"],
+            //   180000, 0,
+            //   // 12000000.0, 0.8,
+            //   240000, 1
+            // ]
 
             // 'circle-color': [
             //     'match',
@@ -79,36 +79,36 @@ map.on('load', function () {
         }
     });
 
-    map.on('click', 'housepoints', function (e) {
+    // map.on('click', 'housepoints', function (e) {
 
-        var coordinates = e.features[0].geometry.coordinates.slice();
-        var description = e.features[0].properties.A10;
-        var housingcount = e.features[0].properties.A16;
-        var housingcountstr = housingcount.toString();
-        var popupcontent = description + "" + "(" + housingcountstr + ")";
+    //     var coordinates = e.features[0].geometry.coordinates.slice();
+    //     var description = e.features[0].properties.A10;
+    //     var housingcount = e.features[0].properties.A16;
+    //     var housingcountstr = housingcount.toString();
+    //     var popupcontent = description + "" + "(" + housingcountstr + ")";
 
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
+    //     // Ensure that if the map is zoomed out such that multiple
+    //     // copies of the feature are visible, the popup appears
+    //     // over the copy being pointed to.
+    //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    //     }
 
-        new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setText(popupcontent)
-            .addTo(map);
-    });
+    //     new mapboxgl.Popup()
+    //         .setLngLat(coordinates)
+    //         .setText(popupcontent)
+    //         .addTo(map);
+    // });
 
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'places', function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
+    // // Change the cursor to a pointer when the mouse is over the places layer.
+    // map.on('mouseenter', 'places', function () {
+    //     map.getCanvas().style.cursor = 'pointer';
+    // });
 
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'places', function () {
-        map.getCanvas().style.cursor = '';
-    });
+    // // Change it back to a pointer when it leaves.
+    // map.on('mouseleave', 'places', function () {
+    //     map.getCanvas().style.cursor = '';
+    // });
 
 
 });
