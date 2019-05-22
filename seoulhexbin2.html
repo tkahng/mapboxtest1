@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Seoul Housing Price Hexbin</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
+    <script src="seoulhousingpricewgs.geojson" type="text/javascript"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+
+<script type="text/javascript">
+mapboxgl.accessToken = 'pk.eyJ1IjoidGthaG5nIiwiYSI6ImNqOTU3aWtnejRldGgycnF6d3JueG5wb2IifQ.vOYkEc5_mcoA2gtILL5ZmA';
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v10',
+    center: [126.994, 37.518],
+    zoom: 10,
+    pitch: 50,
+    bearing: 30
+});
+
+const arrMax = arr => Math.max(...arr);
+const arrMin = arr => Math.min(...arr);
+const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+const arrSum = arr => arr.reduce((a,b) => a + b, 0)
+
+const bbox = [126.8, 37.4, 127.2, 37.7];
+const cellSide = 0.5;
+const options = {};
+const hexGrid = turf.hexGrid(bbox, cellSide, options);
+var hexpriceAvg = [];
+var hexpriceAvgclean=[];
+
+var hexpricemin = arrMin(hexpriceAvgclean);
+var hexpricemax = arrMax(hexpriceAvgclean);
+
+var invalidEntries = 0;
+
+function isNumber(obj) {
+  return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj);
+}
+
+function filterByID(item) {
+  if (isNumber(item.id) && item.id !== 0) {
+    return true;
+  } 
+  invalidEntries++;
+  return false; 
+}
+
+hexpriceAvgclean = hexpriceAvg.filter(filterByID);
+
+hexGrid.features.forEach(f => {
+  var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
+  var ptsWithinPriceArr = [];
+  ptsWithin.features.forEach(e => {
+    ptsWithinPriceArr.push(e.properties['A15'])
+  })
+  var ptsWithinPriceAvg = arrAvg(ptsWithinPriceArr)*0.0005;
+  var centerpoint = turf.center(f);
+  var centercoords = turf.getCoord(centerpoint);
+  hexpriceAvg.push(ptsWithinPriceAvg);
+  f.properties = { pricesum: ptsWithinPriceAvg, count: ptsWithin.features.length};
+});
+
+map.on('load', function() {
+    map.addLayer({
+        'id': 'hex',
+        'type': 'fill-extrusion',
+        'source': {
+            'type': 'geojson',
+            'data': hexGrid
+        },
+        'filter': [">", "count", 0],
+        'layout': {},
+        'paint': {
+            'fill-extrusion-color': '#088',
+            // 'fill-extrusion-opacity': [
+            //   "interpolate", ["linear"], ["get", "density"],
+            //   0, 0.3,
+            //   1, 1
+            // ],
+            'fill-extrusion-opacity':0.5,
+            'fill-extrusion-height': ["get", "pricesum"]
+        }
+    });
+});
+
+</script>
+</body>
+</html>
