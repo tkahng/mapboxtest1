@@ -38,39 +38,33 @@ var map = new mapboxgl.Map({
 // const arrSum = arr => arr.reduce((a,b) => a + b, 0)
 
 const bbox = [126.8, 37.4, 127.2, 37.7];
-const cellSide = 1;
+const cellSide = 0.1;
 const options = {};
-var hexGrid = turf.hexGrid(bbox, cellSide, options);
-var hexpricesum = [];
-// var hexpricemin = arrMin(hexpricesum)-10;
-// var hexpricemax = arrMax(hexpricesum)+10;
-var hexpricemax;
-var hexpricemin;
+var cleanHexGrid =[];
+var hexGrid = turf.hexGrid(bbox, cellSide, options);    
+hexGrid.features.forEach(f => {
+    f.properties = { density: Math.random() };
+});
+
+var hexGrid = turf.collect(hexGrid, seoulresmin, 'A15', 'values');
+
+hexGrid.features.forEach(f => {
+    f.properties.values = _.mean(f.properties.values)
+});
+
+// _.reject(hexGrid.features, ['values', NaN]);
+
+var matchingFeatures = hexGrid.features.filter(function (feature){ 
+    return feature.properties.values >= 0 
+})
+
+var collection = turf.featureCollection(matchingFeatures);
+
+var hexpricemax = _.max(_.map(matchingFeatures, _.property('properties.values')));
+var hexpricemin = _.min(_.map(matchingFeatures, _.property('properties.values')));
 
 
-// hexGrid.features.forEach(f => {
-//   var ptsWithin = turf.pointsWithinPolygon(seoulhousingpricewgs, f);
-//   var ptsWithinPriceArr = [];
-//   ptsWithin.features.forEach(e => {
-//     ptsWithinPriceArr.push(e.properties['A15'])
-//   })
-//   const arrSum = arr => arr.reduce((a,b) => a + b, 0);
-//   var ptsWithinPriceSum = arrSum(ptsWithinPriceArr);
-//   var centerpoint = turf.center(f);
-//   var centercoords = turf.getCoord(centerpoint);
-//   hexpricesum.push(ptsWithinPriceSum);
 
-//   f.properties = { pricesum: ptsWithinPriceSum, count: ptsWithin.features.length, center: centercoords};
-// });
-
-var collected = turf.collect(hexGrid, seoulhousingpricewgs, 'A15', "values");
-
-// collected.features.forEach(f => {
-//     _.mean(f.properties.values);
-// })
-
-// hexpricemax = _.max(collected.features.properties[values]);
-// hexpricemin = _.min(collected.features.properties[values]);
 
 map.on('load', function() {
     // Add a new source from our GeoJSON data and set the
